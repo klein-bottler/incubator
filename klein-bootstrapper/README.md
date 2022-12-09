@@ -5,6 +5,8 @@ This is known as an embedded [development container](https://code.visualstudio.c
 
 The bootstrapper is meant to be an entry-point to enter and use rich development containers. Other tools may end up packaged with the bootstrapper (such as the bottler), but we're still figuring out the best way to separate and package our project.
 
+A test build of this bootstrapper container can be found [here](https://quay.io/repository/klein/klein-bootstrapper-test)
+
 
 Some goals:
 
