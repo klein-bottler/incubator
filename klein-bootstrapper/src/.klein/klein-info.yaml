@@ -1,0 +1,8 @@
+klein-info-version: 0.0.1-dev
+releases:
+  - registry: quay.io/klein
+    name: klein-bootstrapper-test
+    tag: latest
+  - registry: quay.io/klein
+    name: klein-bootstrapper-test
+    tag: 0.0.1-dev
