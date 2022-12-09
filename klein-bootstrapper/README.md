@@ -7,6 +7,8 @@ The bootstrapper is meant to be an entry-point to enter and use rich development
 
 A test build of this bootstrapper container can be found [here](https://quay.io/repository/klein/klein-bootstrapper-test)
 
+Usage: `. <(podman run --rm quay.io/klein/klein-bootstrapper-test /enter-sh)`
+
 
 Some goals:
 
