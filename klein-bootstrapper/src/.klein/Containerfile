@@ -2,10 +2,14 @@ FROM alpine:3.16.2
 
 RUN apk add --no-cache podman fuse-overlayfs shadow
 
+# set up nsswitch.conf for Go's "netgo" implementation
+# - https://github.com/golang/go/blob/go1.9.1/src/net/conf.go#L194-L275
+# - podman run --rm debian:stretch grep '^hosts:' /etc/nsswitch.conf
+RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
-RUN useradd podman; \
-echo -e "podman:1:999\npodman:1001:64535" > /etc/subuid; \
-echo -e "podman:1:999\npodman:1001:64535" > /etc/subgid;
+RUN useradd podman && \
+    echo -e "podman:1:999\npodman:1001:64535" > /etc/subuid && \
+    echo -e "podman:1:999\npodman:1001:64535" > /etc/subgid
 
 COPY assets/config/containers.global.conf /etc/containers/containers.conf
 COPY assets/config/containers.local.conf /home/podman/.config/containers/containers.conf
@@ -40,17 +44,22 @@ RUN apk add --no-cache bash git jq zsh vim coreutils ncurses python3 py3-pip
 # leave a relatively recent package index explicitly
 RUN apk update
 
-COPY . /klein
-RUN cp /klein/assets/config/.profile /root/.profile; \
-    cp /klein/assets/config/.profile /etc/profile; \
-    cp /klein/assets/config/.profile /home/podman/.profile; \
-    cp /klein/assets/config/.profile /home/podman/.profile; \
-    cp /klein/assets/config/.bashrc /root/.bashrc; \
-    cp /klein/assets/config/.bashrc /home/podman/.bashrc; \
-    cp /klein/assets/config/.bashrc /etc/bash/bashrc;\
-    cp /klein/assets/enter-sh.sh /enter-sh; \
-    cp -r /klein/assets/bootstrap /bootstrap; \
+RUN mkdir -p /klein/metadata
+COPY . /klein/src
+RUN cp /klein/src/assets/config/.profile /root/.profile; \
+    cp /klein/src/assets/config/.profile /etc/profile; \
+    cp /klein/src/assets/config/.profile /home/podman/.profile; \
+    cp /klein/src/assets/config/.profile /home/podman/.profile; \
+    cp /klein/src/assets/config/.bashrc /root/.bashrc; \
+    cp /klein/src/assets/config/.bashrc /home/podman/.bashrc; \
+    cp /klein/src/assets/config/.bashrc /etc/bash/bashrc;\
+    cp /klein/src/assets/enter-sh.sh /enter-sh; \
+    cp -r /klein/src/assets/bootstrap /bootstrap; \
     env > /bootstrap/env_defaults; \
     echo "PATH=$PATH" >> /bootstrap/env_overrides
+ARG BUILD_HASH="NA"
+RUN . ./klein/src/assets/utils/image_tools.sh; \
+    hash_src /klein/src/ > '/klein/metadata/local-klein-src.hash'; \
+    printf "$BUILD_HASH" > '/klein/metadata/build-klein-src.hash';
 ENV PATH="${PATH}:/bootstrap"
 WORKDIR /

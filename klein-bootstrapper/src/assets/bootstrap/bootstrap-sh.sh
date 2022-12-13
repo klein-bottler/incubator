@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
-export KLEIN_BOOSTRAPPER="$([ -z "$KLEIN_BOOSTRAPPER" ] && echo "klein-bootstrapper" || echo "$KLEIN_BOOSTRAPPER")"
+
+export KLEIN_BOOTSTRAPPER_REPO="$([ -z "$KLEIN_BOOTSTRAPPER_REPO" ] && echo "quay.io/klein" || echo "$KLEIN_BOOTSTRAPPER_REPO")"
+export KLEIN_BOOTSTRAPPER="$([ -z "$KLEIN_BOOTSTRAPPER" ] && echo "klein-bootstrapper-test" || echo "$KLEIN_BOOTSTRAPPER")"
 export KLEIN_SESSION_NAME="$([ -z "$KLEIN_SESSION_NAME" ] && echo "klein-localdev-$(date +%s)" || echo "$KLEIN_SESSION_NAME")"
 export KLEIN_INTERNAL_USER="podman"
 { # UTILS
@@ -66,7 +68,7 @@ klein_restart_localdev() {
         --rm \
         --workdir "/devroot/$CWD" \
         --name $KLEIN_SESSION_NAME \
-        $KLEIN_BOOSTRAPPER \
+        "$KLEIN_BOOTSTRAPPER_REPO/$KLEIN_BOOTSTRAPPER" \
         sh
     klein_cache_env_defaults
 }
@@ -94,5 +96,5 @@ _() {
         --env "SHLVL=$(( $SHLVL + 1 ))" \
         --workdir "/devroot/$CWD" \
         $KLEIN_SESSION_NAME \
-        bash --login --pretty-print -c "{ [[ $HAS_PIPE -eq 0 ]] && cat || echo ''; } | $vars"
+        bash --login --pretty-print -ic "exec 0>/dev/pts/0; exec 1>/dev/pts/0; exec 2>/dev/pts/0; { [[ $HAS_PIPE -eq 0 ]] && cat || echo ''; } | $vars"
 }
